@@ -17,9 +17,7 @@ class AkunScreen extends StatefulWidget {
 }
 
 class _AkunScreenState extends State<AkunScreen> {
-  String _waktuPagi = '07:00';
-  String _waktuMalam = '21:00';
-
+  bool _isDeleting = false;
   bool get _isDark => themeNotifier.value == ThemeMode.dark;
 
   String _formatTanggalGabung(DateTime? date) {
@@ -39,102 +37,6 @@ class _AkunScreenState extends State<AkunScreen> {
       'Desember'
     ];
     return '${d.day} ${bulan[d.month - 1]} ${d.year}';
-  }
-
-  void _dialogUbahWaktu() {
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            backgroundColor: AppTheme.cardBg,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: const Text('Pengingat Rutinitas'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Atur jadwal pengingat penggunaan produk:',
-                  style: GoogleFonts.inter(color: AppTheme.textMedium, fontSize: 13),
-                ),
-                const SizedBox(height: 16),
-                ListTile(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  tileColor: AppTheme.surfaceMuted,
-                  leading: const Icon(Icons.wb_sunny_outlined, color: AppTheme.honeyYellow),
-                  title: Text(
-                    'Rutinitas Pagi',
-                    style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: AppTheme.textDark),
-                  ),
-                  trailing: Text(
-                    _waktuPagi,
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.mintDark,
-                      fontSize: 15,
-                    ),
-                  ),
-                  onTap: () async {
-                    final picked = await showTimePicker(
-                      context: context,
-                      initialTime: const TimeOfDay(hour: 7, minute: 0),
-                    );
-                    if (picked != null) {
-                      final formatted =
-                          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
-                      setState(() => _waktuPagi = formatted);
-                      setDialogState(() {});
-                    }
-                  },
-                ),
-                const SizedBox(height: 10),
-                ListTile(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  tileColor: AppTheme.surfaceMuted,
-                  leading: const Icon(Icons.nightlight_round_outlined, color: AppTheme.skyBlue),
-                  title: Text(
-                    'Rutinitas Malam',
-                    style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: AppTheme.textDark),
-                  ),
-                  trailing: Text(
-                    _waktuMalam,
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.mintDark,
-                      fontSize: 15,
-                    ),
-                  ),
-                  onTap: () async {
-                    final picked = await showTimePicker(
-                      context: context,
-                      initialTime: const TimeOfDay(hour: 21, minute: 0),
-                    );
-                    if (picked != null) {
-                      final formatted =
-                          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
-                      setState(() => _waktuMalam = formatted);
-                      setDialogState(() {});
-                    }
-                  },
-                ),
-              ],
-            ),
-            actions: [
-              ElevatedButton(
-                onPressed: () => Navigator.pop(ctx),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryMint,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                child: const Text('Simpan'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
   }
 
   void _konfirmasiLogout(BuildContext context) {
@@ -172,8 +74,86 @@ class _AkunScreenState extends State<AkunScreen> {
     );
   }
 
+  void _konfirmasiHapusAkun(BuildContext context) {
+    final emailTarget = widget.user?.email ?? 'dewi@useby.app';
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardBg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Hapus Akun Permanen'),
+        content: Text(
+          'Tindakan ini akan menghapus akun "$emailTarget" beserta seluruh data produk Anda secara permanen dan tidak dapat dibatalkan. Lanjutkan?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _prosesHapusAkun(emailTarget);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade600,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Hapus Permanen'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _prosesHapusAkun(String email) async {
+    if (_isDeleting) return;
+    setState(() => _isDeleting = true);
+
+    final (success, errorMessage) = await AuthService().deleteAccount(email: email);
+
+    if (!mounted) return;
+    setState(() => _isDeleting = false);
+
+    if (!success) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppTheme.peachBlush,
+          behavior: SnackBarBehavior.floating,
+          content: Text(errorMessage ?? 'Gagal menghapus akun. Silakan coba lagi.'),
+        ),
+      );
+      return;
+    }
+
+    widget.daftarProduk?.clear();
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        backgroundColor: AppTheme.primaryMint,
+        behavior: SnackBarBehavior.floating,
+        content: Text('Akun dan seluruh data Anda telah dihapus.'),
+      ),
+    );
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Penggunaan MediaQuery untuk responsivitas layout
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final isTablet = screenWidth >= 600;
+    final isSmall = mediaQuery.size.width < 360;
+    final horizontalPad = isSmall ? 14.0 : (isTablet ? 28.0 : 20.0);
+
     final namaUser = widget.user?.nama ?? 'Dewi Cantika';
     final emailUser = widget.user?.email ?? 'dewi@useby.app';
     final totalProduk = widget.daftarProduk?.length ?? 5;
@@ -181,9 +161,12 @@ class _AkunScreenState extends State<AkunScreen> {
     return Scaffold(
       backgroundColor: AppTheme.scaffoldBg,
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
-          children: [
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(horizontalPad, 16, horizontalPad, 110),
+              children: [
             // Header Akun
             Text(
               'Profil Pengguna',
@@ -272,32 +255,6 @@ class _AkunScreenState extends State<AkunScreen> {
                       ],
                     ),
                   ),
-                  if (widget.user?.token != null) ...[
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppTheme.mintLight,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppTheme.mintBorder),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.verified_user_outlined, size: 14, color: AppTheme.primaryMint),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Sesi Terverifikasi Cloud REST API',
-                            style: GoogleFonts.inter(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.mintDark,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -370,14 +327,6 @@ class _AkunScreenState extends State<AkunScreen> {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.alarm, color: AppTheme.primaryMint),
-                      title: const Text('Pengingat Rutinitas'),
-                      subtitle: Text('Pagi: $_waktuPagi • Malam: $_waktuMalam'),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: _dialogUbahWaktu,
-                    ),
-                    const Divider(height: 1, indent: 56),
-                    ListTile(
                       leading: Icon(
                         _isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
                         color: AppTheme.primaryMint,
@@ -411,7 +360,7 @@ class _AkunScreenState extends State<AkunScreen> {
               width: double.infinity,
               height: 48,
               child: OutlinedButton.icon(
-                onPressed: () => _konfirmasiLogout(context),
+                onPressed: _isDeleting ? null : () => _konfirmasiLogout(context),
                 icon: const Icon(Icons.logout, color: AppTheme.peachBlush, size: 18),
                 label: Text(
                   'Keluar dari Akun',
@@ -426,7 +375,36 @@ class _AkunScreenState extends State<AkunScreen> {
                 ),
               ),
             ),
-          ],
+
+            const SizedBox(height: 12),
+
+            // Opsi Hapus Akun (subtil di bawah Logout, standar aplikasi mobile)
+            Center(
+              child: TextButton(
+                onPressed: _isDeleting ? null : () => _konfirmasiHapusAkun(context),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppTheme.textMedium,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                child: _isDeleting
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(
+                        'Hapus Akun',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.textMedium,
+                        ),
+                      ),
+              ),
+            ),
+              ],
+            ),
+          ),
         ),
       ),
     );

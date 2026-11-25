@@ -68,5 +68,19 @@ void main() {
     await tester.tap(switchFinder);
     await tester.pumpAndSettle();
     expect(themeNotifier.value, ThemeMode.light);
+
+    // Uji dialog Hapus Akun di tab Profil
+    final hapusAkunFinder = find.text('Hapus Akun');
+    await tester.ensureVisible(hapusAkunFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(hapusAkunFinder);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hapus Akun Permanen'), findsOneWidget);
+    await tester.tap(find.text('Hapus Permanen'));
+    await tester.pumpAndSettle();
+
+    // Setelah hapus akun, pengguna kembali ke halaman Login
+    expect(find.text('Masuk ke Akun'), findsOneWidget);
   });
 }

@@ -159,80 +159,92 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Penggunaan MediaQuery untuk desain responsif berbagai ukuran HP
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final isShort = screenHeight < 680 || mediaQuery.orientation == Orientation.landscape;
+    final isSmall = mediaQuery.size.width < 360;
+    final horizontalPad = isSmall ? 16.0 : (mediaQuery.size.width > 600 ? 32.0 : 24.0);
+    final verticalPad = isShort ? 14.0 : 24.0;
+    final iconSize = isShort ? 56.0 : 72.0;
+    final spacingMedium = isShort ? 16.0 : 28.0;
+
     return Scaffold(
       backgroundColor: AppTheme.scaffoldBg,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // App Icon
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      color: AppTheme.mintLight,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppTheme.mintBorder, width: 2),
-                    ),
-                    child: ClipOval(
-                      child: Image.asset(
-                        'lib/assets/icon/app_icon.png',
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.inventory_2_outlined, size: 36, color: AppTheme.primaryMint),
+            padding: EdgeInsets.symmetric(horizontal: horizontalPad, vertical: verticalPad),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // App Icon
+                    Container(
+                      width: iconSize,
+                      height: iconSize,
+                      decoration: BoxDecoration(
+                        color: AppTheme.mintLight,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppTheme.mintBorder, width: 2),
+                      ),
+                      child: ClipOval(
+                        child: Image.asset(
+                          'lib/assets/icon/app_icon.png',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Icon(Icons.inventory_2_outlined, size: isShort ? 28 : 36, color: AppTheme.primaryMint),
+                        ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 16),
+                    SizedBox(height: isShort ? 10 : 16),
 
-                  // Header Aplikasi
-                  Text(
-                    'UseBy',
-                    style: GoogleFonts.inter(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      color: AppTheme.textDark,
+                    // Header Aplikasi
+                    Text(
+                      'UseBy',
+                      style: GoogleFonts.inter(
+                        fontSize: isShort ? 22 : 26,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.textDark,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Pengingat Masa Pakai & Kedaluwarsa Produk',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: AppTheme.textMedium,
+                    const SizedBox(height: 4),
+                    Text(
+                      'Pengingat Masa Pakai & Kedaluwarsa Produk',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: isShort ? 12 : 13,
+                        color: AppTheme.textMedium,
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 32),
+                    SizedBox(height: spacingMedium),
 
-                  // Card Form
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppTheme.cardBg,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppTheme.mintBorder.withValues(alpha: 0.6)),
-                      boxShadow: AppTheme.softShadow(),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Masuk ke Akun',
-                          style: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.textDark,
+                    // Card Form
+                    Container(
+                      padding: EdgeInsets.all(isSmall ? 16 : 20),
+                      decoration: BoxDecoration(
+                        color: AppTheme.cardBg,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppTheme.mintBorder.withValues(alpha: 0.6)),
+                        boxShadow: AppTheme.softShadow(),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Masuk ke Akun',
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textDark,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 18),
+                          SizedBox(height: isShort ? 12 : 18),
 
                         // Input Email
                         Text(
@@ -380,9 +392,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 20),
 
-                  // Link ke Registrasi
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  // Link ke Registrasi Responsif
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
                         'Belum punya akun? ',
@@ -408,6 +421,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

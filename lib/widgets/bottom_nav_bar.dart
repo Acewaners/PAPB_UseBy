@@ -14,26 +14,36 @@ class UseByBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Penggunaan MediaQuery untuk safe area bawah di HP
+    final mediaQuery = MediaQuery.of(context);
+    final bottomInset = mediaQuery.padding.bottom;
+    final bottomPadding = bottomInset > 0 ? bottomInset + 4 : 12.0;
+
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-      decoration: const BoxDecoration(
-        color: Colors.transparent,
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          color: AppTheme.cardBg,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: AppTheme.mintBorder,
-            width: 1.5,
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(8, 8, 8, bottomPadding),
+      decoration: BoxDecoration(
+        color: AppTheme.cardBg,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        border: Border(
+          top: BorderSide(
+            color: AppTheme.mintBorder.withValues(alpha: 0.8),
+            width: 1.2,
           ),
-          boxShadow: AppTheme.softShadow(spread: 1),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _NavItem(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, -3),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Expanded(
+            child: _NavItem(
               index: 0,
               selectedIndex: selectedIndex,
               icon: Icons.home_outlined,
@@ -41,7 +51,9 @@ class UseByBottomNavBar extends StatelessWidget {
               label: 'Beranda',
               onTap: onTap,
             ),
-            _NavItem(
+          ),
+          Expanded(
+            child: _NavItem(
               index: 1,
               selectedIndex: selectedIndex,
               icon: Icons.inventory_2_outlined,
@@ -49,7 +61,9 @@ class UseByBottomNavBar extends StatelessWidget {
               label: 'Pantau',
               onTap: onTap,
             ),
-            _NavItem(
+          ),
+          Expanded(
+            child: _NavItem(
               index: 2,
               selectedIndex: selectedIndex,
               icon: Icons.person_outline_rounded,
@@ -57,8 +71,8 @@ class UseByBottomNavBar extends StatelessWidget {
               label: 'Profil',
               onTap: onTap,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -84,47 +98,53 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSelected = index == selectedIndex;
+    final isSmall = MediaQuery.of(context).size.width < 360;
 
     return GestureDetector(
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 18 : 12,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? AppTheme.mintLight : Colors.transparent,
-          borderRadius: BorderRadius.circular(22),
-          border: isSelected
-              ? Border.all(
-                  color: AppTheme.primaryMint.withValues(alpha: 0.35),
-                  width: 1.2,
-                )
-              : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isSelected ? activeIcon : icon,
-              color: isSelected ? AppTheme.mintDark : AppTheme.textLight,
-              size: 22,
-            ),
-            if (isSelected) ...[
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: GoogleFonts.inter(
-                  color: AppTheme.mintDark,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
+      child: Align(
+        alignment: Alignment.center,
+        heightFactor: 1.25,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+          padding: EdgeInsets.symmetric(
+            horizontal: isSelected ? (isSmall ? 10 : 16) : 8,
+            vertical: 8,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected ? AppTheme.mintLight : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            border: isSelected
+                ? Border.all(
+                    color: AppTheme.primaryMint.withValues(alpha: 0.35),
+                    width: 1.2,
+                  )
+                : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isSelected ? activeIcon : icon,
+                color: isSelected ? AppTheme.mintDark : AppTheme.textLight,
+                size: isSmall ? 20 : 22,
               ),
+              if (isSelected) ...[
+                SizedBox(width: isSmall ? 4 : 6),
+                Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    color: AppTheme.mintDark,
+                    fontSize: isSmall ? 12 : 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

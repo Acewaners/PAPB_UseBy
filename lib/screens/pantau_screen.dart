@@ -188,38 +188,47 @@ class _PantauScreenState extends State<PantauScreen> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppTheme.mintBorder,
-                          borderRadius: BorderRadius.circular(10),
+            final mediaQuery = MediaQuery.of(context);
+            final isSmall = mediaQuery.size.width < 360;
+
+            return Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 560,
+                  maxHeight: mediaQuery.size.height * 0.9,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: isSmall ? 14 : 20,
+                    right: isSmall ? 14 : 20,
+                    top: 20,
+                    bottom: mediaQuery.viewInsets.bottom + 24,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: AppTheme.mintBorder,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Edit Produk',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.textDark,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Edit Produk',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textDark,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
 
                     // Nama Produk
                     Text(
@@ -451,15 +460,26 @@ class _PantauScreenState extends State<PantauScreen> {
                   ],
                 ),
               ),
-            );
-          },
+            ),
+          ),
         );
       },
     );
-  }
+  },
+);
+}
 
   @override
   Widget build(BuildContext context) {
+    // Penggunaan MediaQuery untuk desain responsif antar perangkat
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final isTablet = screenWidth >= 600;
+    final isSmall = screenWidth < 360;
+    final horizontalPad = isSmall ? 14.0 : (isTablet ? 28.0 : 20.0);
+    final statCols = isTablet ? 4 : 2;
+    final statAspectRatio = isTablet ? 1.15 : (isSmall ? 1.15 : 1.25);
+
     final jumlahKedaluwarsa = widget.daftarProduk
         .where((p) => p.status == StatusProduk.kedaluwarsa)
         .length;
@@ -475,73 +495,76 @@ class _PantauScreenState extends State<PantauScreen> {
     return Scaffold(
       backgroundColor: AppTheme.scaffoldBg,
       body: SafeArea(
-        child: SingleChildScrollView(
-          key: _viewportKey,
-          controller: _scrollController,
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Pantau Produk',
-                style: GoogleFonts.inter(
-                  color: AppTheme.textDark,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'Detail status masa pakai dan kedaluwarsa produk',
-                style: GoogleFonts.inter(
-                  color: AppTheme.textMedium,
-                  fontSize: 13,
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              // Grid Ringkasan Status
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 1.25,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: SingleChildScrollView(
+              key: _viewportKey,
+              controller: _scrollController,
+              padding: EdgeInsets.fromLTRB(horizontalPad, 16, horizontalPad, 110),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  StatCard(
-                    icon: Icons.check_circle_outline,
-                    label: 'Masih Aman',
-                    jumlah: jumlahAman,
-                    warna: AppTheme.primaryMint,
-                    subtext: 'Aman',
+                  Text(
+                    'Pantau Produk',
+                    style: GoogleFonts.inter(
+                      color: AppTheme.textDark,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                  StatCard(
-                    icon: Icons.access_time,
-                    label: 'Segera Habis',
-                    jumlah: jumlahAkanHabis,
-                    warna: AppTheme.honeyYellow,
-                    subtext: '< 7 Hari',
+                  const SizedBox(height: 2),
+                  Text(
+                    'Detail status masa pakai dan kedaluwarsa produk',
+                    style: GoogleFonts.inter(
+                      color: AppTheme.textMedium,
+                      fontSize: 13,
+                    ),
                   ),
-                  StatCard(
-                    icon: Icons.highlight_off,
-                    label: 'Kedaluwarsa',
-                    jumlah: jumlahKedaluwarsa,
-                    warna: AppTheme.peachBlush,
-                    subtext: 'Lewat',
-                  ),
-                  StatCard(
-                    icon: Icons.pending_outlined,
-                    label: 'Belum Lengkap',
-                    jumlah: jumlahBelumLengkap,
-                    warna: AppTheme.lavender,
-                    subtext: 'Perlu Input',
-                  ),
-                ],
-              ),
 
-              const SizedBox(height: 22),
+                  const SizedBox(height: 18),
+
+                  // Grid Ringkasan Status Responsif
+                  GridView.count(
+                    crossAxisCount: statCols,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: isSmall ? 8 : 12,
+                    crossAxisSpacing: isSmall ? 8 : 12,
+                    childAspectRatio: statAspectRatio,
+                    children: [
+                      StatCard(
+                        icon: Icons.check_circle_outline,
+                        label: 'Masih Aman',
+                        jumlah: jumlahAman,
+                        warna: AppTheme.primaryMint,
+                        subtext: 'Aman',
+                      ),
+                      StatCard(
+                        icon: Icons.access_time,
+                        label: 'Segera Habis',
+                        jumlah: jumlahAkanHabis,
+                        warna: AppTheme.honeyYellow,
+                        subtext: '< 7 Hari',
+                      ),
+                      StatCard(
+                        icon: Icons.highlight_off,
+                        label: 'Kedaluwarsa',
+                        jumlah: jumlahKedaluwarsa,
+                        warna: AppTheme.peachBlush,
+                        subtext: 'Lewat',
+                      ),
+                      StatCard(
+                        icon: Icons.pending_outlined,
+                        label: 'Belum Lengkap',
+                        jumlah: jumlahBelumLengkap,
+                        warna: AppTheme.lavender,
+                        subtext: 'Perlu Input',
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 22),
 
               // Filter Kategori
               SizedBox(
@@ -662,6 +685,8 @@ class _PantauScreenState extends State<PantauScreen> {
           ),
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 }

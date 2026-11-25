@@ -70,38 +70,47 @@ class _BerandaScreenState extends State<BerandaScreen> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppTheme.mintBorder,
-                          borderRadius: BorderRadius.circular(10),
+            final mediaQuery = MediaQuery.of(context);
+            final isSmall = mediaQuery.size.width < 360;
+
+            return Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 560,
+                  maxHeight: mediaQuery.size.height * 0.9,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: isSmall ? 14 : 20,
+                    right: isSmall ? 14 : 20,
+                    top: 20,
+                    bottom: mediaQuery.viewInsets.bottom + 24,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: AppTheme.mintBorder,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Tambah Produk Baru',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.textDark,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Tambah Produk Baru',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textDark,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
 
                     // 1. Input Nama Produk
                     Text(
@@ -398,15 +407,24 @@ class _BerandaScreenState extends State<BerandaScreen> {
                   ],
                 ),
               ),
-            );
-          },
+            ),
+          ),
         );
       },
     );
-  }
+  },
+);
+}
 
   @override
   Widget build(BuildContext context) {
+    // Penggunaan MediaQuery untuk desain responsif antar perangkat
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final isTablet = screenWidth >= 600;
+    final isSmall = screenWidth < 360;
+    final horizontalPad = isSmall ? 14.0 : (isTablet ? 28.0 : 20.0);
+
     final jumlahAkanHabis = widget.daftarProduk
         .where((p) => p.status == StatusProduk.akanHabis)
         .length;
@@ -422,9 +440,12 @@ class _BerandaScreenState extends State<BerandaScreen> {
           if (mounted) setState(() {});
         },
         child: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
-            children: [
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(horizontalPad, 16, horizontalPad, 110),
+                children: [
               // Header Profil Pengguna
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -766,6 +787,8 @@ class _BerandaScreenState extends State<BerandaScreen> {
           ),
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 }

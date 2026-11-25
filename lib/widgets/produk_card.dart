@@ -75,6 +75,7 @@ class ProdukCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusConfig = _getStatusConfig(produk.status);
     final progress = produk.rasioMasaPakai;
+    final isSmall = MediaQuery.of(context).size.width < 360;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -131,28 +132,33 @@ class ProdukCard extends StatelessWidget {
               ),
             // Bagian Header Kartu
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              padding: EdgeInsets.fromLTRB(
+                isSmall ? 12 : 16,
+                isSmall ? 12 : 16,
+                isSmall ? 12 : 16,
+                isSmall ? 10 : 12,
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Avatar Kategori
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: isSmall ? 40 : 48,
+                    height: isSmall ? 40 : 48,
                     decoration: BoxDecoration(
                       color: AppTheme.surfaceMuted,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(isSmall ? 12 : 16),
                       border: Border.all(color: AppTheme.mintBorder, width: 1.5),
                     ),
                     child: Center(
                       child: Icon(
                         produk.kategoriIcon,
-                        size: 24,
+                        size: isSmall ? 20 : 24,
                         color: AppTheme.primaryMint,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: isSmall ? 8 : 12),
 
                   // Nama Produk & Kategori
                   Expanded(
@@ -163,7 +169,7 @@ class ProdukCard extends StatelessWidget {
                           produk.nama,
                           style: GoogleFonts.nunito(
                             color: AppTheme.textDark,
-                            fontSize: 17,
+                            fontSize: isSmall ? 15 : 17,
                             fontWeight: FontWeight.w800,
                           ),
                           maxLines: 1,
@@ -189,12 +195,14 @@ class ProdukCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: isSmall ? 6 : 8),
 
                   // Pill Badge Status Imut
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmall ? 7 : 10,
+                      vertical: isSmall ? 4 : 6,
+                    ),
                     decoration: BoxDecoration(
                       color: statusConfig.bgColor,
                       borderRadius: BorderRadius.circular(20),
@@ -208,7 +216,7 @@ class ProdukCard extends StatelessWidget {
                       children: [
                         Icon(
                           statusConfig.icon,
-                          size: 13,
+                          size: isSmall ? 11 : 13,
                           color: statusConfig.primaryColor,
                         ),
                         const SizedBox(width: 4),
@@ -218,7 +226,7 @@ class ProdukCard extends StatelessWidget {
                               : produk.labelSisaHari,
                           style: GoogleFonts.nunito(
                             color: statusConfig.primaryColor,
-                            fontSize: 11.5,
+                            fontSize: isSmall ? 10.5 : 11.5,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -288,9 +296,9 @@ class ProdukCard extends StatelessWidget {
 
             // Grid Detail Info Masa Pakai (4 Kotak Mini Pastel)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: isSmall ? 12 : 16),
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(isSmall ? 8 : 12),
                 decoration: BoxDecoration(
                   color: AppTheme.surfaceMuted.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(16),
@@ -364,7 +372,7 @@ class ProdukCard extends StatelessWidget {
 
             // Baris Tombol Aksi (Edit & Hapus)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+              padding: EdgeInsets.fromLTRB(isSmall ? 12 : 16, 10, isSmall ? 12 : 16, isSmall ? 10 : 14),
               child: Row(
                 children: [
                   // Pesan status

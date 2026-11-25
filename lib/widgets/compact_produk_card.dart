@@ -44,6 +44,7 @@ class CompactProdukCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusColor = _getStatusColor(produk.status);
     final statusBg = _getStatusBg(produk.status);
+    final isSmall = MediaQuery.of(context).size.width < 360;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -63,13 +64,16 @@ class CompactProdukCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(14),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmall ? 10 : 14,
+              vertical: isSmall ? 10 : 12,
+            ),
             child: Row(
               children: [
                 // Avatar Kategori
                 Container(
-                  width: 42,
-                  height: 42,
+                  width: isSmall ? 36 : 42,
+                  height: isSmall ? 36 : 42,
                   decoration: BoxDecoration(
                     color: AppTheme.surfaceMuted,
                     borderRadius: BorderRadius.circular(12),
@@ -81,12 +85,12 @@ class CompactProdukCard extends StatelessWidget {
                   child: Center(
                     child: Icon(
                       produk.kategoriIcon,
-                      size: 22,
+                      size: isSmall ? 19 : 22,
                       color: AppTheme.primaryMint,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: isSmall ? 8 : 12),
 
                 // Nama Produk & Kategori
                 Expanded(
